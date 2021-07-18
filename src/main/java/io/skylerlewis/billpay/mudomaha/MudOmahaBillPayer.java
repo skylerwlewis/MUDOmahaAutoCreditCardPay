@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
@@ -37,7 +38,10 @@ public class MudOmahaBillPayer {
             System.setProperty("webdriver.chrome.driver", args[5]);
         }
 
-        WebDriver driver = new ChromeDriver();
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments("--no-sandbox");
+        chromeOptions.addArguments("--headless");
+        WebDriver driver = new ChromeDriver(chromeOptions);
 
         try {
             messageSender = new GmailMessageSender(gmailUsername, gmailPassword, toAddress);
@@ -55,7 +59,7 @@ public class MudOmahaBillPayer {
             if (BigDecimal.ZERO.compareTo(amountDue) < 0) {
                 String amountDueString = "$" + amountDue.setScale(2).toPlainString();
                 LOGGER.info("MUD Omaha bill due: " + amountDueString);
-                //payBill(driver, amountDue);
+                payBill(driver, amountDue);
                 String message = String.format("MUD Omaha bill (%s) was paid successfully.", amountDueString);
                 LOGGER.info(message);
                 messageSender.sendMessage(message);
@@ -104,6 +108,9 @@ public class MudOmahaBillPayer {
                 BigDecimal payButtonAmount = new BigDecimal(payButtonText.replaceAll("Pay", "").replaceFirst("\\$", "").trim());
                 if (amountDue.compareTo(payButtonAmount) == 0) {
                     payButton.click();
+                    LOGGER.info("Clicked the pay button");
+
+                    wait.until(ExpectedConditions.elementToBeClickable(By.id("logoutCloseWindowBtn")));
                 } else {
                     String message = "The amount in the pay button didn't match the expected amount";
                     LOGGER.error(message);
