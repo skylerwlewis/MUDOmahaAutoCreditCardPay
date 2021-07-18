@@ -50,9 +50,10 @@ public class MudOmahaBillPayer {
 
             MudOmahaAuthenticator.login(username, password, driver);
 
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#__xmlview1--payMyBillTile-number.sapMStdTileNumS")));
-            WebElement amountDueDiv = driver.findElement(By.cssSelector("#__xmlview1--payMyBillTile-number.sapMStdTileNumS"));
+            wait.until(ExpectedConditions.or(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#__xmlview1--payMyBillTile-number.sapMStdTileNumS")),
+                    ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#__xmlview1--payMyBillTile-number.sapMStdTileNumM"))));
 
+            WebElement amountDueDiv = driver.findElement(By.cssSelector("#__xmlview1--payMyBillTile-number"));
             String amountDueText = amountDueDiv.getText();
             BigDecimal amountDue = new BigDecimal(amountDueText.replaceFirst("\\$", "").trim());
 
