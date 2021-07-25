@@ -3,30 +3,32 @@ package io.skylerlewis.billpay.mudomaha;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-import java.util.Arrays;
-import java.util.HashSet;
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.util.Properties;
-import java.util.Set;
 
 public class GmailMessageSender {
 
     private static Logger LOGGER = LoggerFactory.getLogger(GmailMessageSender.class);
 
     private static Properties GMAIL_SESSION_PROPERTIES;
+
     static {
-        String host = "imap.gmail.com";
         GMAIL_SESSION_PROPERTIES = new Properties();
-        GMAIL_SESSION_PROPERTIES.put("mail.imap.host", host);
-        GMAIL_SESSION_PROPERTIES.put("mail.imap.port", "993");
-        GMAIL_SESSION_PROPERTIES.put("mail.imap.starttls.enable", "true");
-        GMAIL_SESSION_PROPERTIES.put("mail.imap.ssl.trust", host);
         GMAIL_SESSION_PROPERTIES.put("mail.smtp.host", "smtp.gmail.com");
         GMAIL_SESSION_PROPERTIES.put("mail.smtp.port", "587");
         GMAIL_SESSION_PROPERTIES.put("mail.smtp.auth", "true");
         GMAIL_SESSION_PROPERTIES.put("mail.smtp.starttls.enable", "true");
     }
+
+    Session session;
+    InternetAddress fromAddress;
+    InternetAddress[] toAddresses;
 
     public GmailMessageSender(String gmailUsername, String gmailPassword, String toAddress) throws AddressException {
         this.session = Session.getInstance(GMAIL_SESSION_PROPERTIES, new javax.mail.Authenticator() {
@@ -37,36 +39,29 @@ public class GmailMessageSender {
         });
 
         this.fromAddress = new InternetAddress(gmailUsername);
-        this.toAddresses = new HashSet<>(Arrays.asList(InternetAddress.parse(toAddress)));
+        this.toAddresses = new InternetAddress[]{new InternetAddress(toAddress)};
     }
 
-    Session session;
-    InternetAddress fromAddress;
-    Set<InternetAddress> toAddresses;
-
-    public void sendMessage(String emailMessage) {
+    public boolean sendMessage(String emailMessage) {
+        boolean successfulSend = false;
         try {
             LOGGER.info("Sending alert message");
 
             Message message = new MimeMessage(session);
             message.setFrom(fromAddress);
-            message.setRecipients(
-                    Message.RecipientType.TO, toAddresses.toArray(new Address[0]));
+            message.setRecipients(Message.RecipientType.TO, toAddresses);
             message.setReplyTo(new InternetAddress[]{fromAddress});
 
-            MimeBodyPart mimeBodyPart = new MimeBodyPart();
-            mimeBodyPart.setContent(emailMessage, "text/html");
-
-            Multipart multipart = new MimeMultipart();
-            multipart.addBodyPart(mimeBodyPart);
-
-            message.setContent(multipart);
+            message.setText(emailMessage);
 
             Transport.send(message);
+
+            successfulSend = true;
         } catch (Exception e) {
             LOGGER.error(String.format("There was a problem sending out an error message: \"%s\".", emailMessage), e);
         }
 
+        return successfulSend;
     }
 
 }
