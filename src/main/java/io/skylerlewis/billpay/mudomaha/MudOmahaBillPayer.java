@@ -1,9 +1,7 @@
 package io.skylerlewis.billpay.mudomaha;
 
 import io.skylerlewis.billpay.mudomaha.authenticator.MudOmahaAuthenticator;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -12,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public class MudOmahaBillPayer {
@@ -53,6 +53,11 @@ public class MudOmahaBillPayer {
             wait.until(ExpectedConditions.or(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#__xmlview1--payMyBillTile-number.sapMStdTileNumS")),
                     ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#__xmlview1--payMyBillTile-number.sapMStdTileNumM"))));
 
+            List<String> screenshotData = new ArrayList<>();
+            if (driver instanceof TakesScreenshot) {
+                screenshotData.add(((TakesScreenshot) driver).getScreenshotAs(OutputType.BASE64));
+            }
+
             WebElement amountDueDiv = driver.findElement(By.cssSelector("#__xmlview1--payMyBillTile-number"));
             String amountDueText = amountDueDiv.getText();
             BigDecimal amountDue = new BigDecimal(amountDueText.replaceFirst("\\$", "").trim());
@@ -60,10 +65,17 @@ public class MudOmahaBillPayer {
             if (BigDecimal.ZERO.compareTo(amountDue) < 0) {
                 String amountDueString = "$" + amountDue.setScale(2).toPlainString();
                 LOGGER.info("MUD Omaha bill due: " + amountDueString);
-                payBill(driver, amountDue);
-                String message = String.format("MUD Omaha bill (%s) was paid successfully.", amountDueString);
-                LOGGER.info(message);
-                messageSender.sendMessage(message);
+                boolean success = payBill(driver, amountDue, screenshotData);
+                String[] screenshots = screenshotData.toArray(new String[0]);
+                String message;
+                if (success) {
+                    message = String.format("MUD Omaha bill (%s) was paid successfully.", amountDueString);
+                    LOGGER.info(message);
+                } else {
+                    message = "The amount in the pay button didn't match the expected amount";
+                    LOGGER.error(message);
+                }
+                messageSender.sendMessage(message, screenshots);
             } else {
                 LOGGER.info("No MUD Omaha bill was due.");
             }
@@ -78,7 +90,8 @@ public class MudOmahaBillPayer {
         driver.quit();
     }
 
-    private static void payBill(WebDriver driver, BigDecimal amountDue) {
+    private static boolean payBill(WebDriver driver, BigDecimal amountDue, List<String> screenshotData) {
+        boolean success = false;
         WebDriverWait wait = new WebDriverWait(driver, 120);
 
         WebElement payMyBillButton = driver.findElement(By.id("__xmlview1--payMyBillTile"));
@@ -96,14 +109,26 @@ public class MudOmahaBillPayer {
             if (!popupHandle.contains(mainWindow)) {
                 driver.switchTo().window(popupHandle);
 
+                if (driver instanceof TakesScreenshot) {
+                    screenshotData.add(((TakesScreenshot) driver).getScreenshotAs(OutputType.BASE64));
+                }
+
                 WebElement payBillButton = driver.findElement(By.cssSelector("a[id^=account-expressPay]"));
                 payBillButton.click();
-
                 wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a[title=Continue]")));
+
+                if (driver instanceof TakesScreenshot) {
+                    screenshotData.add(((TakesScreenshot) driver).getScreenshotAs(OutputType.BASE64));
+                }
+
                 WebElement continueButton = driver.findElement(By.cssSelector("a[title=Continue]"));
                 continueButton.click();
-
                 wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a[data-id=btn-payment-confirmation]")));
+
+                if (driver instanceof TakesScreenshot) {
+                    screenshotData.add(((TakesScreenshot) driver).getScreenshotAs(OutputType.BASE64));
+                }
+
                 WebElement payButton = driver.findElement(By.cssSelector("a[data-id=btn-payment-confirmation]"));
                 String payButtonText = payButton.getText();
                 BigDecimal payButtonAmount = new BigDecimal(payButtonText.replaceAll("Pay", "").replaceFirst("\\$", "").trim());
@@ -112,10 +137,12 @@ public class MudOmahaBillPayer {
                     LOGGER.info("Clicked the pay button");
 
                     wait.until(ExpectedConditions.elementToBeClickable(By.id("logoutCloseWindowBtn")));
-                } else {
-                    String message = "The amount in the pay button didn't match the expected amount";
-                    LOGGER.error(message);
-                    messageSender.sendMessage(message);
+
+                    if (driver instanceof TakesScreenshot) {
+                        screenshotData.add(((TakesScreenshot) driver).getScreenshotAs(OutputType.BASE64));
+                    }
+
+                    success = true;
                 }
 
                 driver.close();
@@ -124,6 +151,7 @@ public class MudOmahaBillPayer {
                 driver.switchTo().window(mainWindow);
             }
         }
+        return success;
     }
 
 }
