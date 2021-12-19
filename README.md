@@ -17,7 +17,7 @@ The example below would:
 1. Sign into mudomaha.com using the john.smith@example.com account
 2. If the bill due is $0, print a log message and stop the program
 3. If the bill due is greater than $0, pay the amount due using the credit card saved in the account's wallet
-4. Send a picture message to 123-456-7890 (on Verizon) with screenshots showing the bill has been paid, including the payment confirmation number
+4. Send a picture message using mud-omaha-bill-alert123@gmail.com to 123-456-7890 (on Verizon) with screenshots showing the bill has been paid, including the payment confirmation number
 
 `java -cp mud-omaha-auto-credit-card-pay-1.0-jar-with-dependencies.jar io.skylerlewis.billpay.mudomaha.MudOmahaBillPayer john.smith@example.com jOhNsMiThPaSsWoRd mud-omaha-bill-alert123@gmail.com GmAiLpAsSwOrD 1234567890@vzwpix.com`
 
