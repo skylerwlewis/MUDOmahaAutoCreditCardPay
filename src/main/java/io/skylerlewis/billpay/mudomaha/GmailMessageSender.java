@@ -7,9 +7,7 @@ import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import javax.mail.internet.*;
 import java.util.Properties;
 
 public class GmailMessageSender {
@@ -43,6 +41,10 @@ public class GmailMessageSender {
     }
 
     public boolean sendMessage(String emailMessage) {
+        return sendMessage(emailMessage, null);
+    }
+
+    public boolean sendMessage(String emailMessage, String... imageStrings) {
         boolean successfulSend = false;
         try {
             LOGGER.info("Sending alert message");
@@ -52,7 +54,24 @@ public class GmailMessageSender {
             message.setRecipients(Message.RecipientType.TO, toAddresses);
             message.setReplyTo(new InternetAddress[]{fromAddress});
 
-            message.setText(emailMessage);
+            MimeBodyPart textPart = new MimeBodyPart();
+            textPart.setText(emailMessage);
+
+            MimeMultipart multipart = new MimeMultipart();
+
+            multipart.addBodyPart(textPart);
+
+            if (imageStrings != null) {
+                for (String imageString : imageStrings) {
+                    if (imageString != null) {
+                        MimeBodyPart filePart = new PreencodedMimeBodyPart("base64");
+                        filePart.setContent(imageString, "image/*");
+                        multipart.addBodyPart(filePart);
+                    }
+                }
+            }
+
+            message.setContent(multipart);
 
             Transport.send(message);
 
