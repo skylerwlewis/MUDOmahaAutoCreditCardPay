@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.Set;
 
 public class MudOmahaBillPayer {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(MudOmahaBillPayer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MudOmahaBillPayer.class);
 
     private static GmailMessageSender messageSender;
 
@@ -63,7 +64,7 @@ public class MudOmahaBillPayer {
             BigDecimal amountDue = new BigDecimal(amountDueText.replaceFirst("\\$", "").trim());
 
             if (BigDecimal.ZERO.compareTo(amountDue) < 0) {
-                String amountDueString = "$" + amountDue.setScale(2).toPlainString();
+                String amountDueString = "$" + amountDue.setScale(2, RoundingMode.HALF_UP).toPlainString();
                 LOGGER.info("MUD Omaha bill due: " + amountDueString);
                 boolean success = payBill(driver, amountDue, screenshotData);
                 String[] screenshots = screenshotData.toArray(new String[0]);
@@ -100,12 +101,12 @@ public class MudOmahaBillPayer {
 
         payMyBillButton.click();
 
-        Set windowHandles = driver.getWindowHandles();
+        Set<String> windowHandles = driver.getWindowHandles();
 
-        Iterator windowHandlesIterator = windowHandles.iterator();
+        Iterator<String> windowHandlesIterator = windowHandles.iterator();
 
         while (windowHandlesIterator.hasNext()) {
-            String popupHandle = windowHandlesIterator.next().toString();
+            String popupHandle = windowHandlesIterator.next();
             if (!popupHandle.contains(mainWindow)) {
                 driver.switchTo().window(popupHandle);
 
