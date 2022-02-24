@@ -7,9 +7,18 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class MudOmahaAuthenticator {
 
-    public static void login(String username, String password, WebDriver driver) {
-        WebDriverWait wait = new WebDriverWait(driver, 120);
-        driver.get("https://myaccount.mudomaha.com/");
+    private String mudOmahaUrl;
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    public MudOmahaAuthenticator(String mudOmahaUrl, WebDriver driver, WebDriverWait wait) {
+        this.mudOmahaUrl = mudOmahaUrl;
+        this.driver = driver;
+        this.wait = wait;
+    }
+
+    public void login(String username, String password) {
+        driver.get(mudOmahaUrl);
 
         wait.until(ExpectedConditions.and(ExpectedConditions.visibilityOfElementLocated(By.id("__xmlview0--nameInput-inner")), ExpectedConditions.visibilityOfElementLocated(By.id("__xmlview0--passwordInput-inner")), ExpectedConditions.elementToBeClickable(By.id("__button0"))));
         driver.findElement(By.id("__xmlview0--nameInput-inner")).sendKeys(username);
@@ -19,11 +28,9 @@ public class MudOmahaAuthenticator {
         wait.until(ExpectedConditions.elementToBeClickable(By.id("__xmlview1--accountsSummaryTile")));
     }
 
-    public static void logout(WebDriver driver) {
-        WebDriverWait wait = new WebDriverWait(driver, 120);
+    public void logout() {
         String currentUrl = driver.getCurrentUrl();
-        driver.get("https://myaccount.mudomaha.com/sap/public/bc/icf/logoff");
-
+        driver.get(mudOmahaUrl + "/sap/public/bc/icf/logoff");
         wait.until(ExpectedConditions.not(ExpectedConditions.urlToBe(currentUrl)));
     }
 }

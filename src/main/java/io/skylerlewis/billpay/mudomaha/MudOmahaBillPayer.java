@@ -43,13 +43,16 @@ public class MudOmahaBillPayer {
         chromeOptions.addArguments("--no-sandbox");
         chromeOptions.addArguments("--headless");
         WebDriver driver = new ChromeDriver(chromeOptions);
+        WebDriverWait wait = new WebDriverWait(driver, 120);
+
+        String mudOmahaUrl = "https://myaccount.mudomaha.com/";
+
+        MudOmahaAuthenticator mudOmahaAuthenticator = new MudOmahaAuthenticator(mudOmahaUrl, driver, wait);
 
         try {
             messageSender = new GmailMessageSender(gmailUsername, gmailPassword, toAddress);
 
-            WebDriverWait wait = new WebDriverWait(driver, 120);
-
-            MudOmahaAuthenticator.login(username, password, driver);
+            mudOmahaAuthenticator.login(username, password);
 
             wait.until(ExpectedConditions.or(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#__xmlview1--payMyBillTile-number.sapMStdTileNumS")),
                     ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#__xmlview1--payMyBillTile-number.sapMStdTileNumM"))));
@@ -81,7 +84,7 @@ public class MudOmahaBillPayer {
                 LOGGER.info("No MUD Omaha bill was due.");
             }
 
-            MudOmahaAuthenticator.logout(driver);
+            mudOmahaAuthenticator.logout();
         } catch (Exception e) {
             String message = "There was a problem paying the MUD Omaha bill automatically.";
             LOGGER.error(message, e);
