@@ -66,7 +66,7 @@ public class GmailMessageSender {
                 for (String imageString : imageStrings) {
                     if (imageString != null) {
                         MimeBodyPart filePart = new PreencodedMimeBodyPart("base64");
-                        filePart.setFileName(imageIndex + ".jpg");
+                        filePart.setFileName(imageIndex + ".png");
                         filePart.setContent(imageString, "image/*");
                         multipart.addBodyPart(filePart);
                     }
