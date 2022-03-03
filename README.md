@@ -10,7 +10,7 @@ This is a Java project that uses Selenium, chromedriver, and Gmail to pay an MUD
 ---
 
 ## Usage
-`java -cp mud-omaha-auto-credit-card-pay-1.0.0-jar-with-dependencies.jar io.skylerlewis.billpay.mudomaha.MudOmahaBillPayer <MUD_OMAHA_ACCOUNT_EMAIL> <MUD_OMAHA_ACCOUNT_PASSWORD> <GMAIL_ADDRESS_FOR_SENDING_ALERTS> <GMAIL_PASSWORD_FOR_SENDING_ALERTS> <EMAIL_ADDRESS_FOR_RECEIVING_ALERTS>`
+`java -cp mud-omaha-auto-credit-card-pay-1.1.0-jar-with-dependencies.jar io.skylerlewis.billpay.mudomaha.MudOmahaBillPayer <MUD_OMAHA_ACCOUNT_EMAIL> <MUD_OMAHA_ACCOUNT_PASSWORD> <GMAIL_ADDRESS_FOR_SENDING_ALERTS> <GMAIL_PASSWORD_FOR_SENDING_ALERTS> <EMAIL_ADDRESS_FOR_RECEIVING_ALERTS>`
 
 ## Example
 The example below would:

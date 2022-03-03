@@ -62,12 +62,15 @@ public class GmailMessageSender {
             multipart.addBodyPart(textPart);
 
             if (imageStrings != null) {
+                int imageIndex = 0;
                 for (String imageString : imageStrings) {
                     if (imageString != null) {
                         MimeBodyPart filePart = new PreencodedMimeBodyPart("base64");
+                        filePart.setFileName(imageIndex + ".png");
                         filePart.setContent(imageString, "image/*");
                         multipart.addBodyPart(filePart);
                     }
+                    imageIndex = imageIndex + 1;
                 }
             }
 
