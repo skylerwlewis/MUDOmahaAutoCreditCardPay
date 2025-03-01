@@ -1,5 +1,5 @@
 > [!NOTE]
-> I no longer use this project, so I am archiving this project's repository. I and am keeping it here as a reference for the future.
+> I no longer use this project, so I am archiving this project's repository. I am keeping it here as a reference for the future.
 
 # MUD Omaha Auto Credit Card Pay
 
