@@ -1,3 +1,6 @@
+> [!NOTE]
+> I no longer use this project, so I am archiving this project's repository. I and am keeping it here as a reference for the future.
+
 # MUD Omaha Auto Credit Card Pay
 
 This is a Java project that uses Selenium, chromedriver, and Gmail to pay an MUD Omaha bill using the credit card saved in the account's wallet.
